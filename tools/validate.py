@@ -18,6 +18,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import check_index
 import check_layout
 import check_license
+import check_packs
 import check_release
 import check_schema
 import check_scope
@@ -94,6 +95,11 @@ def run_status(entries, skipped=()):
     return Check("index status", REJECT if errors else PASS, messages)
 
 
+def run_packs(changes):
+    errors = check_packs.check(changes)
+    return Check("packs", REJECT if errors else PASS, errors)
+
+
 def run_release(documents, releases=None, token=None):
     if not documents:
         return Check("release", PASS, ["the change touches no document, so no archive was inspected"])
@@ -118,7 +124,7 @@ def run_checks(changes, skip_release=False, releases=None, token=None):
     """Every check, ordered so a later one can lean on an earlier one."""
     _, documents, _ = check_scope.evaluate(changes)
 
-    gate = [run_layout(), run_schema()]
+    gate = [run_layout(), run_schema(), run_packs(changes)]
     entries, skipped = check_index.load_documents()
     checks = gate + [
         run_index(entries, skipped),
@@ -156,7 +162,11 @@ def changed_paths(repository, number, token):
             if not isinstance(entry, dict) or "filename" not in entry:
                 raise ValueError(f"{url}: an entry carries no filename")
             changes.append(
-                check_scope.Change(entry["filename"], entry.get("status") or "modified")
+                check_scope.Change(
+                    entry["filename"],
+                    entry.get("status") or "modified",
+                    entry.get("previous_filename"),
+                )
             )
         url = _next_page(link)
     return changes

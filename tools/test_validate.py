@@ -97,7 +97,7 @@ class Run(unittest.TestCase):
         self.output = Path(self.folder.name) / "verdict.json"
         self.addCleanup(self.folder.cleanup)
 
-        for name in ("run_layout", "run_schema"):
+        for name in ("run_layout", "run_schema", "run_packs"):
             patch = mock.patch.object(validate, name, passing(name))
             patch.start()
             self.addCleanup(patch.stop)
@@ -156,7 +156,15 @@ class Run(unittest.TestCase):
         names = [check["name"] for check in verdict["checks"]]
         self.assertEqual(
             names,
-            ["run_layout", "run_schema", "run_index", "run_license", "run_status", "release"],
+            [
+                "run_layout",
+                "run_schema",
+                "run_packs",
+                "run_index",
+                "run_license",
+                "run_status",
+                "release",
+            ],
         )
 
     def test_the_archive_inspection_can_be_left_out(self):
@@ -275,6 +283,17 @@ class ChangedPaths(unittest.TestCase):
             changes = validate.changed_paths("a/b", 1, None)
         self.assertEqual(changes, [check_scope.Change("listings/Mod.toml", "removed")])
 
+    def test_a_rename_carries_its_previous_path(self):
+        with self.answer(
+            [{
+                "filename": "archive/1.0.0.toml",
+                "previous_filename": "packs/Starter/1.0.0.toml",
+                "status": "renamed",
+            }]
+        ):
+            changes = validate.changed_paths("a/b", 1, None)
+        self.assertEqual(changes[0].previous_path, "packs/Starter/1.0.0.toml")
+
     def test_a_missing_status_reads_as_a_modification(self):
         with self.answer([{"filename": "listings/Mod.toml"}]):
             changes = validate.changed_paths("a/b", 1, None)
@@ -348,6 +367,7 @@ class RealRepository(unittest.TestCase):
         for check in (
             validate.run_layout(),
             validate.run_schema(),
+            validate.run_packs([]),
             validate.run_index(entries),
             validate.run_license(entries),
         ):
