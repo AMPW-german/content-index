@@ -97,7 +97,7 @@ class Run(unittest.TestCase):
         self.output = Path(self.folder.name) / "verdict.json"
         self.addCleanup(self.folder.cleanup)
 
-        for name in ("run_layout", "run_schema", "run_packs"):
+        for name in ("run_layout", "run_schema", "run_tags", "run_packs"):
             patch = mock.patch.object(validate, name, passing(name))
             patch.start()
             self.addCleanup(patch.stop)
@@ -159,6 +159,7 @@ class Run(unittest.TestCase):
             [
                 "run_layout",
                 "run_schema",
+                "run_tags",
                 "run_packs",
                 "run_index",
                 "run_license",
@@ -231,7 +232,9 @@ class ShortCircuit(unittest.TestCase):
     def run_checks(self, layout, schema, release):
         with mock.patch.object(validate, "run_layout", lambda: layout), mock.patch.object(
             validate, "run_schema", lambda: schema
-        ), mock.patch.object(validate, "run_release", release):
+        ), mock.patch.object(validate, "run_tags", passing("tags")), mock.patch.object(
+            validate, "run_release", release
+        ):
             return validate.run_checks(check_scope.changes(["listings/Mod.toml"]))
 
     def test_a_schema_rejection_stops_the_archive_from_being_fetched(self):
@@ -355,6 +358,34 @@ class ReleaseWiring(unittest.TestCase):
         self.assertTrue(any("listings/B.toml" in message for message in check.messages))
 
 
+class TagWiring(unittest.TestCase):
+    def test_changed_documents_reach_the_tag_check(self):
+        with mock.patch.object(validate.check_tags, "check", return_value=([], ["note"])) as check:
+            result = validate.run_tags(["listings/Mod.toml"])
+        check.assert_called_once_with([validate.ROOT / "listings/Mod.toml"])
+        self.assertEqual(result.outcome, validate.PASS)
+        self.assertEqual(result.messages, ["note"])
+
+    def test_invalid_vocabulary_rejects(self):
+        with mock.patch.object(validate.check_tags, "check", return_value=(["bad"], [])):
+            result = validate.run_tags([])
+        self.assertEqual(result.outcome, validate.REJECT)
+
+    def test_a_schema_rejection_stops_document_inspection(self):
+        tags = mock.Mock(return_value=validate.Check("tags", validate.PASS))
+        with mock.patch.object(validate, "run_layout", passing("layout")), mock.patch.object(
+            validate, "run_schema", lambda: validate.Check("schema", validate.REJECT)
+        ), mock.patch.object(validate, "run_tags", tags), mock.patch.object(
+            validate, "run_packs", passing("packs")
+        ), mock.patch.object(
+            validate.check_index, "load_documents", return_value=([], [])
+        ), mock.patch.object(validate, "run_index", passing("index")), mock.patch.object(
+            validate, "run_license", passing("license")
+        ), mock.patch.object(validate, "run_status", passing("status")):
+            validate.run_checks(check_scope.changes(["listings/Mod.toml"]), skip_release=True)
+        tags.assert_called_once_with(["listings/Mod.toml"], inspect_documents=False)
+
+
 class RealRepository(unittest.TestCase):
     """This repository, run against its own gate.
 
@@ -370,6 +401,7 @@ class RealRepository(unittest.TestCase):
             validate.run_packs([]),
             validate.run_index(entries),
             validate.run_license(entries),
+            validate.run_tags([]),
         ):
             self.assertEqual(check.outcome, validate.PASS, f"{check.name}: {check.messages}")
 
