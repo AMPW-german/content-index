@@ -23,6 +23,7 @@ import check_release
 import check_schema
 import check_scope
 import check_status
+import check_tags
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -100,6 +101,12 @@ def run_packs(changes):
     return Check("packs", REJECT if errors else PASS, errors)
 
 
+def run_tags(documents=(), inspect_documents=True):
+    paths = [ROOT / path for path in documents] if inspect_documents else []
+    errors, notes = check_tags.check(paths)
+    return Check("tags", REJECT if errors else PASS, list(errors) + list(notes))
+
+
 def run_release(documents, releases=None, token=None):
     if not documents:
         return Check("release", PASS, ["the change touches no document, so no archive was inspected"])
@@ -124,7 +131,11 @@ def run_checks(changes, skip_release=False, releases=None, token=None):
     """Every check, ordered so a later one can lean on an earlier one."""
     _, documents, _ = check_scope.evaluate(changes)
 
-    gate = [run_layout(), run_schema(), run_packs(changes)]
+    layout = run_layout()
+    schema = run_schema()
+    tags = run_tags(documents, inspect_documents=schema.outcome == PASS)
+    packs = run_packs(changes)
+    gate = [layout, schema, tags, packs]
     entries, skipped = check_index.load_documents()
     checks = gate + [
         run_index(entries, skipped),

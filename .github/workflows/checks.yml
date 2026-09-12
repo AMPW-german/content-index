@@ -58,6 +58,7 @@ jobs:
       - run: python3 tools/check_schema.py
       - run: python3 tools/check_packs.py
       - run: python3 tools/check_status.py
+      - run: python3 tools/check_tags.py
 
   verdict:
     name: verdict
