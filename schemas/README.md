@@ -68,7 +68,7 @@ Some rules need more than the document, and belong to the checks around it:
 | `install.root` is derivable, and the archive downloads and hashes | `tools/check_release.py`, which reaches the answer by running the stamper against the real archive rather than by repeating its rules |
 | The change is narrow enough to merge itself | `tools/check_scope.py` |
 | An id in `index-status.toml` names a listing or a pack that exists, and a retracted version exists on that pack | `tools/check_status.py` |
-| The author controls the release host | the ownership workflow ([#4](https://github.com/KSAModding/content-index/issues/4)) |
+| The author controls the release host, or owns the pack id | the ownership workflow ([#4](https://github.com/KSAModding/content-index/issues/4)); pack ownership is read from the steward-owned `packs/<id>/owner.json` on the base branch |
 
 ## Where the schema is stricter than the RFC text
 

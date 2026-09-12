@@ -30,6 +30,20 @@ If you want to argue about the format or the index itself, open a thread in [con
 4. Open a pull request that adds exactly one file.
    One document merges itself. A pull request carrying two, or carrying anything besides a document, is valid but waits for a steward.
 
+## Claiming and updating a pack
+
+A first pack claim adds the pack version and `packs/<id>/owner.json` in the same pull request.
+The owner record names the pull request author's GitHub login and numeric account id.
+A steward must accept this first claim because a pack has no release host that can prove ownership.
+
+The accepted owner record is read only from the base branch.
+Changing owner data in a pull request cannot grant ownership or make that pull request merge itself.
+
+After the first claim, the recorded GitHub account can add one new version document at a time and that pull request can merge itself.
+An accepted pack version is immutable and cannot be edited, renamed, or deleted.
+Publish a corrected version in a new file.
+A steward retracts a broken version through its version-scoped entry in `index-status.toml`.
+
 Checks then validate the document, inspect your latest release archive, and verify that you control the release host the listing points at.
 The pull request is then labelled `listing` or `pack`, which says which kind of document it changes, and one that changes both carries both labels.
 
