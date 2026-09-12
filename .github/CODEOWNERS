@@ -10,6 +10,7 @@
 # edit the schema or the checker would be arriving with its own gate.
 
 /index-status.toml @KSAModding/content-manager-stewards
+/tags.toml        @KSAModding/content-manager-stewards
 /packs/*/owner.json @KSAModding/content-manager-stewards
 /.github/          @KSAModding/content-manager-stewards
 /tools/            @KSAModding/content-manager-stewards
