@@ -1,6 +1,6 @@
 # Schemas
 
-`authored.schema.json` is the machine-readable form of the authored document defined by [RFC 0031](https://github.com/KSAModding/content-manager-design/blob/main/rfcs/0031-content-metadata-format.md) and extended by [RFC 0035](https://github.com/KSAModding/content-manager-design/blob/main/rfcs/0035-content-install-descriptor.md).
+`authored.schema.json` is the machine-readable form of the authored document defined by [RFC 0031](https://github.com/KSAModding/content-manager-design/blob/main/rfcs/0031-content-metadata-format.md) and extended by [RFC 0035](https://github.com/KSAModding/content-manager-design/blob/main/rfcs/0035-content-install-descriptor.md) and [RFC 0049](https://github.com/KSAModding/content-manager-design/blob/main/rfcs/0049-instance-handover.md).
 
 It is JSON Schema 2020-12, and it covers all three types the format defines today: `mod`, `mod-loader` and `modpack`.
 
@@ -88,7 +88,8 @@ They are collected here so any one of them can be argued down on its own.
 | Authored SemVer bounds reject a leading `v` | Only a release tag gets its `v` stripped, and that happens at stamp time. An authored bound is not a tag. |
 | Game bounds reject a suffix or a `+hash`, take a four-digit year, and take a month of 1 to 12 | RFC 0017 puts builds carrying a suffix outside the compatibility model, and a bound has to resolve to a revision. |
 | An `any_of` entry may not carry `min` or `max` of its own | RFC 0031 puts the bounds on each alternative. An outer pair would have no defined meaning against a set. |
-| A path may not run through a reserved Windows device name | Not in either RFC. A segment naming `NUL` or `CON` swallows every write on Windows, so a manager writing `[provides.configure]` there reports success and configures nothing, which is the failure that section exists to prevent. |
+| A path may not run through a reserved Windows device name | Not in any RFC. A segment naming `NUL` or `CON` swallows every write on Windows, so a manager writing `[provides.configure]` there reports success and configures nothing, which is the failure that section exists to prevent. |
+| A `[provides.instance]` key may not carry a Unicode control character, U+0000 to U+001F or U+007F to U+009F | RFC 0049 forbids only whitespace. A manager hands the value to a process start as an argument or a variable name, where a control character that is not whitespace, such as a NUL, cuts the value short or makes the start fail. The paths and keys elsewhere in the schema exclude the control characters below U+0020 for the same reason. |
 | `[releases]` must name at least one host | A section carrying only `authority` names an authority for nothing. Implied by RFC 0031 rather than stated. |
 | `tags` are lowercase, and a word or words joined by `-` | RFC 0031 says "free-form lowercase tags". The casing is the RFC's; the separator is this schema's, so a filter list cannot end up holding both `user-interface` and `user_interface`. |
 | `[[mods]]` and `authors` need at least one entry, and `name`, `abstract` and `changelog` may not be empty | A required field present but empty is the same absence with none of the reporting. |
