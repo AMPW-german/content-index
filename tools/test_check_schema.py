@@ -78,6 +78,9 @@ FORUMS = 'forums = "https://forums.ahwoo.com/threads/test-mod.1/"'
 # A loader that installs somewhere, so the provides cases have a valid base.
 STANDALONE = '\n[install]\ntarget = "standalone"\n\n[provides]\nlaunch = "x.exe"\n'
 
+# The instance table on that loader, so each instance case adds only its keys.
+INSTANCE = STANDALONE + "\n[provides.instance]\n"
+
 
 def mod(*, replace=None, keys="", append=""):
     """The base mod document, edited.
@@ -236,6 +239,15 @@ REJECTED = [
     ("configure without a file", loader(append=STANDALONE + '\n[provides.configure]\nformat = "json"\n'), "provides.configure: 'file' is a required property"),
     ("an unwritable configure format", loader(append=STANDALONE + '\n[provides.configure]\nfile = "c.ini"\nformat = "ini"\n'), "provides.configure.format: 'ini' is not one of"),
     ("a configure key that cannot be addressed", loader(append=STANDALONE + '\n[provides.configure]\nfile = "c.json"\nformat = "json"\ngame-path = ""\n'), "provides.configure.game-path: '' does not match"),
+    ("an instance table naming neither key", loader(append=INSTANCE), "provides.instance: {} should be non-empty"),
+    ("an instance flag with whitespace", loader(append=INSTANCE + 'flag = "-Instance Path"\n'), "provides.instance.flag: '-Instance Path' is not a single token without whitespace or control characters"),
+    ("an instance flag with a control character", loader(append=INSTANCE + 'flag = "-Instance\\u0001Path"\n'), "provides.instance.flag: '-Instance\\x01Path' is not a single token without whitespace or control characters"),
+    ("an instance flag with a DEL character", loader(append=INSTANCE + 'flag = "-Instance\\u007fPath"\n'), "provides.instance.flag: '-Instance\\x7fPath' is not a single token without whitespace or control characters"),
+    ("an instance variable with a C1 control character", loader(append=INSTANCE + 'variable = "STARMAP\\u009fPATH"\n'), "provides.instance.variable: 'STARMAP\\x9fPATH' is not a single token without whitespace or control characters"),
+    ("an empty instance variable", loader(append=INSTANCE + 'variable = ""\n'), "provides.instance.variable: '' is not a single token without whitespace or control characters"),
+    ("an instance variable that is not a string", loader(append=INSTANCE + "variable = 3\n"), "provides.instance.variable: 3 is not of type 'string'"),
+    ("an unknown key inside instance", loader(append=INSTANCE + 'flag = "-InstancePath"\npath = "Instances"\n'), "provides.instance: Additional properties are not allowed ('path'"),
+    ("an instance table on a mod", mod(append='\n[provides.instance]\nflag = "-InstancePath"\n'), "provides: this key is not allowed here"),
 
     # License
     ("unbalanced parentheses in the license", mod(replace=('license = "MIT"', 'license = "(MIT OR Apache-2.0"')), "license: '(MIT OR Apache-2.0' has unbalanced parentheses"),
@@ -281,6 +293,9 @@ ACCEPTED = [
     ("two month bounds in order", mod(replace=(GAME_MIN, 'game_min = "2026.7"\ngame_max = "2026.8"'))),
     ("a month bound against a revision bound", mod(replace=(GAME_MIN, 'game_min = "2026.9"\ngame_max = "2026.7.5.4892"'))),
     ("an empty steps list", mod(append="\n[install]\nsteps = []\n")),
+    ("an instance table naming both keys", loader(append=INSTANCE + 'flag = "-InstancePath"\nvariable = "STARMAP_INSTANCE_PATH"\n')),
+    ("an instance table naming only the flag", loader(append=INSTANCE + 'flag = "-InstancePath"\n')),
+    ("an instance table naming only the variable", loader(append=INSTANCE + 'variable = "STARMAP_INSTANCE_PATH"\n')),
     ("a pre-release loader bound", mod(append='\n[loader]\nid = "StarMap"\nmin = "0.5.0-rc.1"\n')),
     ("a pre-release ordered below its release", mod(append='\n[loader]\nid = "StarMap"\nmin = "0.5.0-rc.1"\nmax = "0.5.0"\n')),
     ("a numeric pre-release below an alphanumeric one", mod(append='\n[loader]\nid = "StarMap"\nmin = "1.0.0-1"\nmax = "1.0.0-alpha"\n')),
