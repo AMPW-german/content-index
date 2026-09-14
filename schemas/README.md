@@ -61,6 +61,8 @@ Some rules need more than the document, and belong to the checks around it:
 |---|---|
 | Every SPDX identifier exists in the SPDX list | `tools/check_license.py`. The list is versioned data and must not be frozen into a schema, so it arrives as a pinned dependency instead. |
 | The id does not collide with another listing, case-insensitively | `tools/check_index.py` |
+| A changed document names a forums thread that no other listing or pack names, compared by thread id | `tools/check_index.py` warns only. The id comes from the `links.forums` pattern, so every URL form of one thread compares equal. |
+| A changed document has an `abstract` of at most 280 characters | `tools/check_index.py` warns only. RFC 0031 calls the abstract one or two sentences, and a longer one breaks list views. |
 | The document sits at the path its id and type say | `tools/check_layout.py` |
 | `[loader].id` references content of type `mod-loader`, a dependency id references a `mod`, and a pack member is not itself a pack | `tools/check_index.py` |
 | A named `any_of` member carried `Optional = true` in the archive's own `mod.toml` | the stamper ([content-index-releases#13](https://github.com/KSAModding/content-index-releases/issues/13)), which is the only place the archive is read |

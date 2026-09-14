@@ -386,6 +386,17 @@ class TagWiring(unittest.TestCase):
         tags.assert_called_once_with(["listings/Mod.toml"], inspect_documents=False)
 
 
+class IndexWiring(unittest.TestCase):
+    def test_notes_on_changed_documents_do_not_reject(self):
+        with mock.patch.object(validate.check_index, "check", return_value=[]), mock.patch.object(
+            validate.check_index, "notes", return_value=["note"]
+        ) as notes:
+            result = validate.run_index([], documents=["listings/Mod.toml"])
+        notes.assert_called_once_with([], ["listings/Mod.toml"])
+        self.assertEqual(result.outcome, validate.PASS)
+        self.assertEqual(result.messages, ["note"])
+
+
 class RealRepository(unittest.TestCase):
     """This repository, run against its own gate.
 
@@ -404,6 +415,7 @@ class RealRepository(unittest.TestCase):
             validate.run_tags([]),
         ):
             self.assertEqual(check.outcome, validate.PASS, f"{check.name}: {check.messages}")
+
 
 
 if __name__ == "__main__":

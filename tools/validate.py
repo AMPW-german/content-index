@@ -70,9 +70,9 @@ def run_schema():
     return Check("schema", REJECT if errors else PASS, errors)
 
 
-def run_index(entries, skipped=()):
+def run_index(entries, skipped=(), documents=()):
     errors = check_index.check(entries)
-    messages = list(errors)
+    messages = list(errors) + check_index.notes(entries, documents)
     if skipped:
         messages.append(f"not read, they do not parse: {', '.join(skipped)}")
     return Check("index", REJECT if errors else PASS, messages)
@@ -138,7 +138,7 @@ def run_checks(changes, skip_release=False, releases=None, token=None):
     gate = [layout, schema, tags, packs]
     entries, skipped = check_index.load_documents()
     checks = gate + [
-        run_index(entries, skipped),
+        run_index(entries, skipped, documents),
         run_license(entries),
         run_status(entries, skipped),
     ]
