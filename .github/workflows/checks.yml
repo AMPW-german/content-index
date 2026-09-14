@@ -59,6 +59,7 @@ jobs:
       - run: python3 tools/check_packs.py
       - run: python3 tools/check_status.py
       - run: python3 tools/check_tags.py
+      - run: python3 tools/check_images.py
 
   verdict:
     name: verdict
@@ -73,6 +74,9 @@ jobs:
         uses: actions/checkout@v7
         with:
           ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/pull/{0}/merge', inputs.pull_request) || '' }}
+          # The first parent of the merge commit is the base branch, which an
+          # unchanged image record is compared with.
+          fetch-depth: 2
 
       - name: Check out the stamper
         uses: actions/checkout@v7
@@ -98,6 +102,7 @@ jobs:
           python3 tools/validate.py \
             --pull-request "$PULL_REQUEST" \
             --repository "$REPOSITORY" \
+            --base HEAD^1 \
             --output verdict.json
 
       - name: Leave a verdict even when a step failed

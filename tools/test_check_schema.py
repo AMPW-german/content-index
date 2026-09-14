@@ -81,6 +81,11 @@ STANDALONE = '\n[install]\ntarget = "standalone"\n\n[provides]\nlaunch = "x.exe"
 # The instance table on that loader, so each instance case adds only its keys.
 INSTANCE = STANDALONE + "\n[provides.instance]\n"
 
+ICON_URL = 'url = "https://example.invalid/icon.png"'
+ICON_DIGEST = f'sha256 = "{"a" * 64}"'
+ICON = f"\n[images.icon]\n{ICON_URL}\n{ICON_DIGEST}\nwidth = 512\nheight = 512\nsize = 48213\n"
+SHOT = f'\n[[images.description]]\nid = "shot"\nurl = "https://example.invalid/shot.png"\nsha256 = "{"b" * 64}"\nwidth = 1600\nheight = 900\nsize = 402117\n'
+
 
 def mod(*, replace=None, keys="", append=""):
     """The base mod document, edited.
@@ -255,6 +260,29 @@ REJECTED = [
     ("a license closing before opening", mod(replace=('license = "MIT"', 'license = ")("')), "license: ')(' has unbalanced parentheses"),
     ("a license operator with no right side", mod(replace=('license = "MIT"', 'license = "MIT OR"')), "license: 'MIT OR' does not match"),
 
+    # Images
+    ("an unknown role in images", mod(append='\n[images]\nbanner = "x"\n'), "images: Additional properties are not allowed ('banner'"),
+    ("more than one icon", mod(append=ICON.replace("[images.icon]", "[[images.icon]]")), "images.icon: [{"),
+    ("an icon without a digest", mod(append=ICON.replace(ICON_DIGEST + "\n", "")), "images.icon: 'sha256' is a required property"),
+    ("an unknown key on an image record", mod(append=ICON + 'caption = "x"\n'), "images.icon: Additional properties are not allowed ('caption'"),
+    ("an icon carrying an id", mod(append=ICON + 'id = "icon"\n'), "images.icon.id: this key is not allowed here"),
+    ("an image over http", mod(append=ICON.replace("https://", "http://")), "images.icon.url: 'http://example.invalid/icon.png' is not an https URL"),
+    ("an image source over http", mod(append=ICON + 'source = "http://example.invalid/art"\n'), "images.icon.source: 'http://example.invalid/art' is not an https URL"),
+    ("an image digest that is too short", mod(append=ICON.replace(ICON_DIGEST, 'sha256 = "abc"')), "images.icon.sha256: 'abc' is not a hex SHA-256 digest of 64 characters"),
+    ("an icon below the pixel limit", mod(append=ICON.replace("width = 512", "width = 128")), "images.icon.width: 128 is less than the minimum of 256"),
+    ("an icon above the pixel limit", mod(append=ICON.replace("height = 512", "height = 2048")), "images.icon.height: 2048 is greater than the maximum of 1024"),
+    ("an icon above the byte cap", mod(append=ICON.replace("size = 48213", "size = 262145")), "images.icon.size: 262145 is greater than the maximum of 262144"),
+    ("an image with a size of zero", mod(append=ICON.replace("size = 48213", "size = 0")), "images.icon.size: 0 is less than the minimum of 1"),
+    ("an image license that is not an expression", mod(append=ICON + 'license = "MIT OR"\n'), "images.icon.license: 'MIT OR' does not match"),
+    ("an empty attribution", mod(append=ICON + 'attribution = ""\n'), "images.icon.attribution: '' should be non-empty"),
+    ("a description image without an id", mod(append=SHOT.replace('id = "shot"\n', "")), "images.description[0]: 'id' is a required property"),
+    ("a description image id starting with a dash", mod(append=SHOT.replace('id = "shot"', 'id = "-shot"')), "images.description[0].id: '-shot' is not 1 to 64 ASCII letters"),
+    ("a description image id with a space", mod(append=SHOT.replace('id = "shot"', 'id = "the shot"')), "images.description[0].id: 'the shot' is not 1 to 64 ASCII letters"),
+    ("a description image id above the length limit", mod(append=SHOT.replace('id = "shot"', f'id = "{"s" * 65}"')), "images.description[0].id: 'sss"),
+    ("a description image above the pixel limit", mod(append=SHOT.replace("width = 1600", "width = 4096")), "images.description[0].width: 4096 is greater than the maximum of 2048"),
+    ("a description image above the byte cap", mod(append=SHOT.replace("size = 402117", "size = 1048577")), "images.description[0].size: 1048577 is greater than the maximum of 1048576"),
+    ("more than sixteen description images", mod(append=SHOT * 17), "images.description: [{"),
+
     # Type boundaries
     ("a mod carrying a pack version", mod(keys='version = "1.0.0"\n'), "version: this key is not allowed here"),
     ("a mod carrying a release timestamp", mod(keys='released_at = "2026-08-05T12:00:00Z"\n'), "released_at: this key is not allowed here"),
@@ -315,6 +343,13 @@ ACCEPTED = [
     ("a forums thread link to a post in it", mod(replace=(FORUMS, 'forums = "https://forums.ahwoo.com/threads/test-mod.1/post-42"'))),
     ("a forums thread in the index.php form", mod(replace=(FORUMS, 'forums = "https://forums.ahwoo.com/index.php?threads/test-mod.1/"'))),
     ("a native TOML timestamp in a pack", pack(replace=('released_at = "2026-08-05T12:00:00Z"', "released_at = 2026-08-05T12:00:00Z"))),
+    ("a mod with an icon and a description image", mod(append=ICON + SHOT)),
+    ("an image under its own license with credit", mod(append=ICON + 'license = "CC-BY-4.0"\nattribution = "Artwork by Example Artist"\nsource = "https://example.invalid/art"\n')),
+    ("an image digest in upper case", mod(append=ICON.replace("a" * 64, "A" * 64))),
+    ("an icon at both pixel limits", mod(append=ICON.replace("width = 512\nheight = 512", "width = 1024\nheight = 1024").replace("size = 48213", "size = 262144"))),
+    ("sixteen description images", mod(append="".join(SHOT.replace('"shot"', f'"shot-{index}"') for index in range(16)))),
+    ("a loader with an icon", loader(append=ICON)),
+    ("a pack with an icon", pack(append=ICON)),
 ]
 
 

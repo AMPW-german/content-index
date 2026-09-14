@@ -19,16 +19,33 @@ If you want to argue about the format or the index itself, open a thread in [con
    python3 tools/check_index.py
    python3 tools/check_license.py
    python3 tools/check_status.py
+   python3 tools/check_images.py
    ```
 
-   These need nothing but the repository. The remaining check downloads your latest release and stamps it, which needs the network and a checkout of [content-index-releases](https://github.com/KSAModding/content-index-releases) next to this one:
+   These need nothing but the repository. The remaining checks need the network. The first fetches your images and compares them with their records. The second downloads your latest release and stamps it, which also needs a checkout of [content-index-releases](https://github.com/KSAModding/content-index-releases) next to this one:
 
    ```sh
+   python3 tools/check_images.py listings/<id>.toml
    python3 tools/check_release.py listings/<id>.toml
    ```
 
 4. Open a pull request that adds exactly one file.
    One document merges itself. A pull request carrying two, or carrying anything besides a document, is valid but waits for a steward.
+
+## Images
+
+A listing can have one square icon and the images its description shows, per [RFC 0058](https://github.com/KSAModding/content-manager-design/blob/main/rfcs/0058-listing-images-and-dates.md).
+Each image stays on your own host.
+Its record gives the HTTPS `url`, and the `sha256`, `width`, `height` and `size` of the file.
+The checks fetch each image of the document you change and compare it with its record.
+
+In the description, write `![alt text](ksa-image:<id>)` to show the description image with that `id`.
+A client shows no other image in a description.
+
+When you replace an image with new bytes, change its record in the same pull request.
+
+By adding an image record, you state that you have the right to publish the image and to let clients fetch, display and cache it under the record's `license`, or under the document's `license` when the record names none.
+When the image is third-party work, or its license requires credit, a license notice or a link to the original, put that into the record's `attribution` and `source`.
 
 ## Claiming and updating a pack
 
