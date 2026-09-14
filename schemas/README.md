@@ -1,6 +1,6 @@
 # Schemas
 
-`authored.schema.json` is the machine-readable form of the authored document defined by [RFC 0031](https://github.com/KSAModding/content-manager-design/blob/main/rfcs/0031-content-metadata-format.md) and extended by [RFC 0035](https://github.com/KSAModding/content-manager-design/blob/main/rfcs/0035-content-install-descriptor.md) and [RFC 0049](https://github.com/KSAModding/content-manager-design/blob/main/rfcs/0049-instance-handover.md).
+`authored.schema.json` is the machine-readable form of the authored document defined by [RFC 0031](https://github.com/KSAModding/content-manager-design/blob/main/rfcs/0031-content-metadata-format.md) and extended by [RFC 0035](https://github.com/KSAModding/content-manager-design/blob/main/rfcs/0035-content-install-descriptor.md), [RFC 0049](https://github.com/KSAModding/content-manager-design/blob/main/rfcs/0049-instance-handover.md) and [RFC 0058](https://github.com/KSAModding/content-manager-design/blob/main/rfcs/0058-listing-images-and-dates.md).
 
 It is JSON Schema 2020-12, and it covers all three types the format defines today: `mod`, `mod-loader` and `modpack`.
 
@@ -70,6 +70,9 @@ Some rules need more than the document, and belong to the checks around it:
 | `install.root` is derivable, and the archive downloads and hashes | `tools/check_release.py`, which reaches the answer by running the stamper against the real archive rather than by repeating its rules |
 | The change is narrow enough to merge itself | `tools/check_scope.py` |
 | A changed document has a curated tag, and each free-form tag is in the curated list | `tools/check_tags.py` warns only. `mod`, `mod-loader` and `modpack` share the `mod` list in `tags.toml`. |
+| An icon is square, a description image `id` is used once, and each `ksa-image:` reference in the description names a record | `tools/check_images.py` |
+| Each image of a changed document downloads safely and matches its record | `tools/check_images.py` with the document path, by the fetch rules of RFC 0058 |
+| An image record's `license` names identifiers on the SPDX list | `tools/check_license.py` |
 | An id in `index-status.toml` names a listing or a pack that exists, and a retracted version exists on that pack | `tools/check_status.py` |
 | The author controls the release host, or owns the pack id | the ownership workflow ([#4](https://github.com/KSAModding/content-index/issues/4)); pack ownership is read from the steward-owned `packs/<id>/owner.json` on the base branch |
 
