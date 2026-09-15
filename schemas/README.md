@@ -29,6 +29,19 @@ The other checks around it have their own tests, run together:
 python3 -m unittest discover -s tools -t tools --buffer
 ```
 
+## Writing an image record
+
+`tools/image_record.py` measures an image and prints its `[images.icon]` or `[[images.description]]` record, so nobody writes `sha256`, `width`, `height` and `size` by hand:
+
+```sh
+python3 tools/image_record.py icon.png --icon --url https://example.invalid/my-mod/icon.png --license CC-BY-4.0 --attribution "Artwork by Example Artist"
+python3 tools/image_record.py https://example.invalid/my-mod/settings-window.png --description settings-window
+```
+
+A URL is fetched by the rules of `tools/images.py`, and a local file needs `--url`, the address where it will be hosted.
+The tool validates the record against this schema and the SPDX list.
+When the image breaks a limit or a value is refused, it names the problem on stderr and prints no record.
+
 ## Validate the parsed document
 
 A listing is TOML and the schema is JSON, so a consumer parses first and validates the result.

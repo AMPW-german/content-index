@@ -44,6 +44,17 @@ A client shows no other image in a description.
 
 When you replace an image with new bytes, change its record in the same pull request.
 
+`tools/image_record.py` measures the file and prints the record for you to copy into your document.
+Give it the local file and the address where you will host it, or the address of an image you already host:
+
+```sh
+python3 tools/image_record.py icon.png --icon --url https://example.invalid/my-mod/icon.png
+python3 tools/image_record.py https://example.invalid/my-mod/settings-window.png --description settings-window
+```
+
+Add `--license`, `--attribution` and `--source` when the image needs them.
+When the image breaks a limit, the tool names the limit and prints no record.
+
 By adding an image record, you state that you have the right to publish the image and to let clients fetch, display and cache it under the record's `license`, or under the document's `license` when the record names none.
 When the image is third-party work, or its license requires credit, a license notice or a link to the original, put that into the record's `attribution` and `source`.
 
