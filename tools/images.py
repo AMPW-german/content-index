@@ -34,10 +34,11 @@ TRANSIENT = (408, 425, 429)
 ICON = "icon"
 DESCRIPTION = "description"
 
-Limits = namedtuple("Limits", "low high cap square")
+# `high` bounds the shorter side when `ratio` is set, and each side otherwise.
+Limits = namedtuple("Limits", "low high ratio cap")
 LIMITS = {
-    ICON: Limits(256, 1024, 256 * 1024, True),
-    DESCRIPTION: Limits(1, 2048, 1024 * 1024, False),
+    ICON: Limits(low=256, high=1024, ratio=2, cap=256 * 1024),
+    DESCRIPTION: Limits(low=1, high=2048, ratio=None, cap=1024 * 1024),
 }
 
 PNG = "PNG"
@@ -379,19 +380,39 @@ def _webp(data):
     return Facts(WEBP, width, height, animated)
 
 
+def outside_limits(role, width, height):
+    """Why `width` by `height` pixels breaks the limits of `role`, or None when it does not."""
+    limits = LIMITS[role]
+    shorter, longer = sorted((width, height))
+    if limits.ratio is None:
+        if limits.low <= shorter and longer <= limits.high:
+            return None
+        return f"{width} by {height} pixels is outside {limits.low} to {limits.high} per side"
+    if limits.low <= shorter <= limits.high and longer <= limits.ratio * shorter:
+        return None
+    return (
+        f"{width} by {height} pixels is outside the limits: the shorter side "
+        f"{limits.low} to {limits.high}, the longer side at most {limits.ratio} times the shorter side"
+    )
+
+
+def center_square(width, height):
+    """The square a client shows of an icon, as (left, top, right, bottom) in pixels."""
+    side = min(width, height)
+    left = (width - side) // 2
+    top = (height - side) // 2
+    return left, top, left + side, top + side
+
+
 def compare(record, role, data):
     """What differs between the bytes and the record, or breaks the role's limits."""
-    limits = LIMITS[role]
     facts = inspect(data)
     problems = []
     if facts.animated:
         problems.append(f"the {facts.format} is animated")
-    if not (limits.low <= facts.width <= limits.high and limits.low <= facts.height <= limits.high):
-        problems.append(
-            f"{facts.width} by {facts.height} pixels is outside {limits.low} to {limits.high} per side"
-        )
-    if limits.square and facts.width != facts.height:
-        problems.append(f"{facts.width} by {facts.height} pixels is not square")
+    outside = outside_limits(role, facts.width, facts.height)
+    if outside:
+        problems.append(outside)
     for key, found in (("width", facts.width), ("height", facts.height), ("size", len(data))):
         if record.get(key) != found:
             problems.append(f"{key} is {record.get(key)} and the bytes show {found}")
