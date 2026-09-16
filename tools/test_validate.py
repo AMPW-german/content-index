@@ -393,6 +393,15 @@ class ImageWiring(unittest.TestCase):
         self.assertEqual(len(check.messages), 1)
         self.assertTrue(check.messages[0].startswith("listings/B.toml: "))
 
+    def test_an_icon_that_is_not_square_passes_with_a_note(self):
+        entries = [self.entry("listings/A.toml", {"images": {"icon": {"width": 1280, "height": 640}}})]
+        check = validate.run_images(entries, ["listings/A.toml"])
+        self.assertEqual(check.outcome, validate.PASS)
+        self.assertEqual(
+            check.messages,
+            ["listings/A.toml: images.icon: the icon is 1280 by 640 pixels, so clients show the square from 320,0 to 960,640"],
+        )
+
     def test_a_broken_rule_rejects_in_any_document(self):
         entries = [self.entry("listings/A.toml", {"description": "![x](ksa-image:missing)"})]
         self.assertEqual(validate.run_images(entries, []).outcome, validate.REJECT)

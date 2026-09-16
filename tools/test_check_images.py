@@ -70,9 +70,55 @@ class DocumentRules(unittest.TestCase):
     def test_a_clean_document_adds_nothing(self):
         self.assertEqual(self.check(document(ICON, [shot("a"), shot("b")])), ([], []))
 
-    def test_an_icon_that_is_not_square(self):
-        errors, _ = self.check(document({**ICON, "height": 256}))
-        self.assertEqual(errors, ["listings/Mod.toml: images.icon: an icon is square, and 512 by 256 is not"])
+    def test_an_icon_that_is_not_square_is_a_note(self):
+        errors, notes = self.check(document({**ICON, "width": 1280, "height": 640}))
+        self.assertEqual(errors, [])
+        self.assertEqual(
+            notes,
+            ["listings/Mod.toml: images.icon: the icon is 1280 by 640 pixels, so clients show the square from 320,0 to 960,640"],
+        )
+
+    def test_the_note_for_a_tall_icon_with_an_odd_difference(self):
+        _, notes = self.check(document({**ICON, "width": 256, "height": 511}))
+        self.assertEqual(
+            notes,
+            ["listings/Mod.toml: images.icon: the icon is 256 by 511 pixels, so clients show the square from 0,127 to 256,383"],
+        )
+
+    def test_an_icon_whose_shorter_side_is_above_the_limit(self):
+        errors, notes = self.check(document({**ICON, "width": 2048, "height": 1025}))
+        self.assertEqual(
+            errors,
+            [
+                "listings/Mod.toml: images.icon: 2048 by 1025 pixels is outside the limits: "
+                "the shorter side 256 to 1024, the longer side at most 2 times the shorter side"
+            ],
+        )
+        self.assertEqual(notes, [])
+
+    def test_an_icon_longer_than_twice_its_shorter_side(self):
+        errors, notes = self.check(document({**ICON, "width": 1500, "height": 500}))
+        self.assertEqual(
+            errors,
+            [
+                "listings/Mod.toml: images.icon: 1500 by 500 pixels is outside the limits: "
+                "the shorter side 256 to 1024, the longer side at most 2 times the shorter side"
+            ],
+        )
+        self.assertEqual(notes, [])
+
+    def test_an_icon_whose_shorter_side_is_at_the_limit(self):
+        errors, notes = self.check(document({**ICON, "width": 2048, "height": 1024}))
+        self.assertEqual(errors, [])
+        self.assertEqual(
+            notes,
+            ["listings/Mod.toml: images.icon: the icon is 2048 by 1024 pixels, so clients show the square from 512,0 to 1536,1024"],
+        )
+
+    def test_the_limits_of_each_side_are_left_to_the_schema(self):
+        for width, height in ((128, 4096), (2049, 2049), (1025, 3000)):
+            with self.subTest(width=width, height=height):
+                self.assertEqual(self.check(document({**ICON, "width": width, "height": height})), ([], []))
 
     def test_two_description_images_with_the_same_id(self):
         errors, _ = self.check(document(shots=[shot("a"), shot("a")], description="![x](ksa-image:a)"))

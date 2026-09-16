@@ -515,22 +515,55 @@ class Verify(unittest.TestCase):
         with self.assertRaisesRegex(images.Invalid, "animated"):
             self.verify(record_for(data), images.ICON, data)
 
-    def test_an_icon_that_is_not_square_is_invalid(self):
-        data = png(512, 300)
-        with self.assertRaisesRegex(images.Invalid, "not square"):
-            self.verify(record_for(data), images.ICON, data)
+    def test_a_wide_icon_passes(self):
+        data = png(1280, 640)
+        self.verify(record_for(data), images.ICON, data)
 
-    def test_pixels_outside_the_limits_are_invalid(self):
-        data = png(128, 128)
-        with self.assertRaisesRegex(images.Invalid, "outside 256 to 1024"):
-            self.verify(record_for(data), images.ICON, data)
+    def test_a_tall_icon_passes(self):
+        data = png(640, 1280)
+        self.verify(record_for(data), images.ICON, data)
+
+    def test_an_icon_at_each_pixel_limit_passes(self):
+        for width, height in ((256, 256), (1024, 1024), (256, 512), (2048, 1024)):
+            data = png(width, height)
+            with self.subTest(width=width, height=height):
+                self.verify(record_for(data), images.ICON, data)
+
+    def test_an_icon_past_each_pixel_limit_is_invalid(self):
+        for width, height in ((255, 510), (1025, 1025), (513, 256), (1024, 2049)):
+            data = png(width, height)
+            expected = (
+                f"^{width} by {height} pixels is outside the limits: "
+                "the shorter side 256 to 1024, the longer side at most 2 times the shorter side$"
+            )
+            with self.subTest(width=width, height=height), self.assertRaisesRegex(images.Invalid, expected):
+                self.verify(record_for(data), images.ICON, data)
+
+    def test_a_description_image_outside_the_limits_is_invalid(self):
         wide = png(4096, 100)
-        with self.assertRaisesRegex(images.Invalid, "outside 1 to 2048"):
+        with self.assertRaisesRegex(images.Invalid, "^4096 by 100 pixels is outside 1 to 2048 per side$"):
             self.verify(record_for(wide), images.DESCRIPTION, wide)
 
     def test_bytes_that_are_not_an_image_are_invalid(self):
         with self.assertRaisesRegex(images.Invalid, "not PNG, JPEG or WebP"):
             self.verify({"url": "https://example.invalid/a"}, images.ICON, b"<html></html>")
+
+
+class CenterSquare(unittest.TestCase):
+    def test_a_square_image_is_its_own_square(self):
+        self.assertEqual(images.center_square(512, 512), (0, 0, 512, 512))
+
+    def test_a_wide_image_is_cut_on_the_left_and_the_right(self):
+        self.assertEqual(images.center_square(1280, 640), (320, 0, 960, 640))
+
+    def test_a_tall_image_is_cut_at_the_top_and_the_bottom(self):
+        self.assertEqual(images.center_square(640, 1280), (0, 320, 640, 960))
+
+    def test_an_odd_difference_leaves_the_extra_pixel_on_the_right(self):
+        self.assertEqual(images.center_square(1025, 256), (384, 0, 640, 256))
+
+    def test_an_odd_difference_leaves_the_extra_pixel_at_the_bottom(self):
+        self.assertEqual(images.center_square(256, 513), (0, 128, 256, 384))
 
 
 class Records(unittest.TestCase):

@@ -34,13 +34,17 @@ If you want to argue about the format or the index itself, open a thread in [con
 
 ## Images
 
-A listing can have one square icon and the images its description shows, per [RFC 0058](https://github.com/KSAModding/content-manager-design/blob/main/rfcs/0058-listing-images-and-dates.md).
+A listing can have one icon and the images its description shows, per [RFC 0058](https://github.com/KSAModding/content-manager-design/blob/main/rfcs/0058-listing-images-and-dates.md) and [RFC 0065](https://github.com/KSAModding/content-manager-design/blob/main/rfcs/0065-icon-center-crop.md).
 Each image stays on your own host.
 Its record gives the HTTPS `url`, and the `sha256`, `width`, `height` and `size` of the file.
 The checks fetch each image of the document you change and compare it with its record.
 
 In the description, write `![alt text](ksa-image:<id>)` to show the description image with that `id`.
 A client shows no other image in a description.
+
+A square icon of 512 by 512 pixels or more is the best choice, because you decide exactly what shows.
+An icon that is not square is also valid when its shorter side is 256 to 1024 pixels and its longer side is at most twice its shorter side.
+Clients then show only the square in its center, and the checks give a note that names this square.
 
 When you replace an image with new bytes, change its record in the same pull request.
 

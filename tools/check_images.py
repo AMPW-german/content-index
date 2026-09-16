@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: MIT
-"""Check the [images] table of authored documents, per RFC 0058.
+"""Check the [images] table of authored documents, per RFC 0058 and RFC 0065.
 
-The rules that need only the document run over every document: an icon is
-square, a description image id is used once, and every ksa-image reference in
-the description names such an id.
+The rules that need only the document run over every document: the sides of an
+icon are inside their limits, a description image id is used once, and every
+ksa-image reference in the description names such an id. The schema bounds each
+side alone, so it cannot state the rules for the shorter side and the ratio. An icon that is
+not square only gives a note, which names the square that clients show.
 
 With document paths, the images of those documents are fetched and compared
 with their records. On an edit, a record the base branch already carries
@@ -37,8 +39,22 @@ def check_document(where, document, errors, notes):
     seen = {}
     for place, role, record in images.records(document):
         width, height = record.get("width"), record.get("height")
-        if role == images.ICON and isinstance(width, int) and isinstance(height, int) and width != height:
-            errors.append(f"{where}: {place}: an icon is square, and {width} by {height} is not")
+        if (
+            role == images.ICON
+            and isinstance(width, int)
+            and isinstance(height, int)
+            and images.LIMITS[role].low <= min(width, height)
+            and max(width, height) <= images.LIMITS[role].high * images.LIMITS[role].ratio
+        ):
+            outside = images.outside_limits(role, width, height)
+            if outside:
+                errors.append(f"{where}: {place}: {outside}")
+            elif width != height:
+                left, top, right, bottom = images.center_square(width, height)
+                notes.append(
+                    f"{where}: {place}: the icon is {width} by {height} pixels, "
+                    f"so clients show the square from {left},{top} to {right},{bottom}"
+                )
         identifier = record.get("id")
         if role == images.DESCRIPTION and isinstance(identifier, str):
             if identifier in seen:
