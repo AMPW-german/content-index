@@ -74,12 +74,12 @@
       "additionalProperties": false,
       "properties": {
         "icon": {
-          "description": "The square image that stands for the listing in lists, tiles and headers.",
+          "description": "The image that stands for the listing in lists, tiles and headers. A client shows its center square.",
           "$ref": "#/$defs/imageRecord",
           "properties": {
             "id": { "not": {} },
-            "width": { "minimum": 256, "maximum": 1024 },
-            "height": { "minimum": 256, "maximum": 1024 },
+            "width": { "minimum": 256, "maximum": 2048 },
+            "height": { "minimum": 256, "maximum": 2048 },
             "size": { "maximum": 262144 }
           }
         },
