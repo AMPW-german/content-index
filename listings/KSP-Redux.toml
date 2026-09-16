@@ -68,7 +68,7 @@ tags = ["celestial", "visual", "audio"]
 [releases]
 github = "PlazmaBoltz/KSP-Redux"
 spacedock = 4040
-authority = "spacedock"
+authority = "github"
 
 [links]
 forums = "https://forums.ahwoo.com/threads/ksp-redux.338/"
