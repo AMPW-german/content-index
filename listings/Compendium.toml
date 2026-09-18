@@ -3,7 +3,7 @@ id = "Compendium"
 type = "mod"
 name = "Compendium"
 authors = ["nanonestor"]
-abstract = "This mod adds a \"Mods\" menu tab to the Main Menu Bar at the top of the screen for mods to put menu entries in."
+abstract = "Compendium adds a window (which may be toggled on/off via ModMenu) which provides a helpful companion to exploring the currently loaded solar system!"
 description = """
 Compendium adds a window (which may be toggled on/off via ModMenu) which provides a helpful companion to exploring the currently loaded solar system!
 
