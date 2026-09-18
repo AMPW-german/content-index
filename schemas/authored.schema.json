@@ -467,6 +467,7 @@
 
     "relativePath": {
       "$comment": "RFC 0035 rule 1 and 2: relative, / separated, and containment is a validity rule because a manager executes this with write access to a game directory. Forbidding .. as a whole segment is what makes the normalised form unable to leave its anchor.",
+      "title": "a relative path with / separators",
       "type": "string",
       "pattern": "^(?!~)(?![A-Za-z]:)[^/\\\\\\u0000-\\u001f]+(?:/[^/\\\\\\u0000-\\u001f]+)*(?![\\s\\S])",
       "allOf": [
