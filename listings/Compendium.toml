@@ -23,7 +23,7 @@ authority = "spacedock"
 forums = "https://forums.ahwoo.com/forums/kitten-space-agency/mod-releases/compendium.647/"
 repository = "https://github.com/meow-sci/Compendium"
 spacedock = "https://spacedock.info/mod/4074/Compendium"
-bugtracker = "https://github.com/MrJeranimo/ModMenu/issues"
+bugtracker = "https://github.com/meow-sci/Compendium/issues"
 
 [compatibility]
 game_min = "2026.9.7.5402"
