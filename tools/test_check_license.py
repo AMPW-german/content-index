@@ -37,6 +37,9 @@ class Accepted(unittest.TestCase):
     def test_a_license_reference_inside_an_expression(self):
         self.assert_ok("MIT AND LicenseRef-Kitten-1.0")
 
+    def test_several_licenses_that_all_apply(self):
+        self.assert_ok("GPL-2.0-only AND CC-BY-SA-4.0")
+
     def test_the_licenses_the_repository_itself_uses(self):
         self.assert_ok("CC0-1.0")
         self.assert_ok("CC-BY-4.0")
@@ -73,6 +76,12 @@ class Rejected(unittest.TestCase):
 
     def test_a_plain_license_used_as_an_exception(self):
         self.assert_rejected("MIT WITH MIT", "MIT")
+
+    def test_several_licenses_joined_by_a_comma(self):
+        self.assert_rejected("GPL-2.0, CC BY-SA 4.0", "join several licenses with AND or OR")
+
+    def test_an_unknown_identifier_points_at_the_list(self):
+        self.assert_rejected("CC-BY-SA", check_license.SPDX_LIST)
 
 
 class DoesNotCrash(unittest.TestCase):

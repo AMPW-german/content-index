@@ -552,6 +552,7 @@
 
     "spdxExpression": {
       "$comment": "Expression shape only. Whether every identifier exists in the SPDX list is versioned data that must not be frozen into a schema, and parenthesis balancing is not expressible here; both are checked by tools/check_schema.py.",
+      "title": "an SPDX license expression, such as MIT, or GPL-2.0-only AND CC-BY-SA-4.0 for several licenses",
       "type": "string",
       "pattern": "^[A-Za-z0-9.:+()-]+(?: (?:AND|OR|WITH) [A-Za-z0-9.:+()-]+)*(?![\\s\\S])"
     },
