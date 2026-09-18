@@ -32,6 +32,25 @@ If you want to argue about the format or the index itself, open a thread in [con
 4. Open a pull request that adds exactly one file.
    One document merges itself. A pull request carrying two, or carrying anything besides a document, is valid but waits for a steward.
 
+## The license field
+
+`license` is an SPDX license expression.
+For one license, write its identifier from the [SPDX license list](https://spdx.org/licenses/), such as `MIT` or `CC-BY-SA-4.0`.
+The identifier is the short form with hyphens, so `CC BY-SA 4.0` is not valid.
+
+When parts of your content have different licenses, join them with `AND`.
+For example, code under GPL-2.0 and data files under CC BY-SA 4.0:
+
+```toml
+license = "GPL-2.0-only AND CC-BY-SA-4.0"
+```
+
+When the user may choose one of several licenses, join them with `OR`, such as `MIT OR Apache-2.0`.
+A comma does not join licenses.
+
+A license that is not on the SPDX list can be named as `LicenseRef-` followed by a name of your choice, such as `LicenseRef-MyModLicense`.
+An image can have its own `license` in its record when its terms differ from those of the content, see [Images](#images).
+
 ## Images
 
 A listing can have one icon and the images its description shows, per [RFC 0058](https://github.com/KSAModding/content-manager-design/blob/main/rfcs/0058-listing-images-and-dates.md) and [RFC 0065](https://github.com/KSAModding/content-manager-design/blob/main/rfcs/0065-icon-center-crop.md).
