@@ -258,7 +258,8 @@ REJECTED = [
     ("unbalanced parentheses in the license", mod(replace=('license = "MIT"', 'license = "(MIT OR Apache-2.0"')), "license: '(MIT OR Apache-2.0' has unbalanced parentheses"),
     ("a license closing a parenthesis it never opened", mod(replace=('license = "MIT"', 'license = "MIT)"')), "license: 'MIT)' has unbalanced parentheses"),
     ("a license closing before opening", mod(replace=('license = "MIT"', 'license = ")("')), "license: ')(' has unbalanced parentheses"),
-    ("a license operator with no right side", mod(replace=('license = "MIT"', 'license = "MIT OR"')), "license: 'MIT OR' does not match"),
+    ("a license operator with no right side", mod(replace=('license = "MIT"', 'license = "MIT OR"')), "license: 'MIT OR' is not an SPDX license expression"),
+    ("several licenses joined by a comma", mod(replace=('license = "MIT"', 'license = "GPL-2.0, CC BY-SA 4.0"')), "license: 'GPL-2.0, CC BY-SA 4.0' is not an SPDX license expression, such as MIT, or GPL-2.0-only AND CC-BY-SA-4.0 for several licenses"),
 
     # Images
     ("an unknown role in images", mod(append='\n[images]\nbanner = "x"\n'), "images: Additional properties are not allowed ('banner'"),
@@ -273,7 +274,7 @@ REJECTED = [
     ("an icon above the pixel limit", mod(append=ICON.replace("height = 512", "height = 2049")), "images.icon.height: 2049 is greater than the maximum of 2048"),
     ("an icon above the byte cap", mod(append=ICON.replace("size = 48213", "size = 262145")), "images.icon.size: 262145 is greater than the maximum of 262144"),
     ("an image with a size of zero", mod(append=ICON.replace("size = 48213", "size = 0")), "images.icon.size: 0 is less than the minimum of 1"),
-    ("an image license that is not an expression", mod(append=ICON + 'license = "MIT OR"\n'), "images.icon.license: 'MIT OR' does not match"),
+    ("an image license that is not an expression", mod(append=ICON + 'license = "MIT OR"\n'), "images.icon.license: 'MIT OR' is not an SPDX license expression"),
     ("an empty attribution", mod(append=ICON + 'attribution = ""\n'), "images.icon.attribution: '' should be non-empty"),
     ("a description image without an id", mod(append=SHOT.replace('id = "shot"\n', "")), "images.description[0]: 'id' is a required property"),
     ("a description image id starting with a dash", mod(append=SHOT.replace('id = "shot"', 'id = "-shot"')), "images.description[0].id: '-shot' is not 1 to 64 ASCII letters"),
@@ -329,6 +330,7 @@ ACCEPTED = [
     ("a numeric pre-release below an alphanumeric one", mod(append='\n[loader]\nid = "StarMap"\nmin = "1.0.0-1"\nmax = "1.0.0-alpha"\n')),
     ("build metadata on a bound", mod(append='\n[loader]\nid = "StarMap"\nmin = "0.4.5+build.7"\nmax = "0.4.5"\n')),
     ("a compound license expression", mod(replace=('license = "MIT"', 'license = "(MIT OR Apache-2.0) AND CC0-1.0"'))),
+    ("several licenses joined with AND", mod(replace=('license = "MIT"', 'license = "GPL-2.0-only AND CC-BY-SA-4.0"'))),
     ("a license exception", mod(replace=('license = "MIT"', 'license = "GPL-2.0-or-later WITH Bison-exception-2.2"'))),
     ("a custom license reference", mod(replace=('license = "MIT"', 'license = "LicenseRef-Kitten-1.0"'))),
     ("a dotted id", mod(replace=('id = "TestMod"', 'id = "Kitten.Tools"'))),

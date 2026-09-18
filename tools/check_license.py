@@ -18,6 +18,7 @@ IDSTRING = r"[A-Za-z0-9.-]+"
 LICENSE_REF = re.compile(
     rf"^(?:DocumentRef-{IDSTRING}:)?LicenseRef-{IDSTRING}(?![\s\S])"
 )
+SPDX_LIST = "https://spdx.org/licenses/"
 
 _licensing = None
 
@@ -39,14 +40,20 @@ def errors_for(expression):
     try:
         result = spdx.validate(expression, strict=True)
     except Exception:
-        return [f"'{expression}' does not parse as an SPDX license expression"]
+        return [
+            f"'{expression}' does not parse as an SPDX license expression; join several "
+            "licenses with AND or OR, such as GPL-2.0-only AND CC-BY-SA-4.0"
+        ]
 
     unknown = [
         symbol for symbol in result.invalid_symbols if not LICENSE_REF.match(str(symbol))
     ]
     if unknown:
         named = ", ".join(sorted(str(symbol) for symbol in unknown))
-        return [f"'{expression}' names {named}, which is not on the SPDX license list"]
+        return [
+            f"'{expression}' names {named}, which is not on the SPDX license list; "
+            f"the identifiers are at {SPDX_LIST}"
+        ]
 
     if result.errors and not result.invalid_symbols:
         return [f"'{expression}': {'; '.join(result.errors)}"]
