@@ -29,6 +29,8 @@ If you want to argue about the format or the index itself, open a thread in [con
    python3 tools/check_release.py listings/<id>.toml
    ```
 
+   A release archive can be at most 4 GiB, and the release check and the watcher reject a larger one.
+
 4. Open a pull request that adds exactly one file.
    One document merges itself. A pull request carrying two, or carrying anything besides a document, is valid but waits for a steward.
 
