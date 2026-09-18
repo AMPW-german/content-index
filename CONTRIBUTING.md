@@ -83,6 +83,25 @@ When the image breaks a limit, the tool names the limit and prints no record.
 By adding an image record, you state that you have the right to publish the image and to let clients fetch, display and cache it under the record's `license`, or under the document's `license` when the record names none.
 When the image is third-party work, or its license requires credit, a license notice or a link to the original, put that into the record's `attribution` and `source`.
 
+## Launching a mod loader
+
+A `mod-loader` listing names the file a player starts in `[provides].launch`.
+When your loader starts differently on one platform, add an entry for that platform, per [RFC 0067](https://github.com/KSAModding/content-manager-design/blob/main/rfcs/0067-per-platform-launch.md):
+
+```toml
+[provides]
+launch = "StarMap.exe"
+
+[provides.platform.linux]
+runtime = "dotnet"
+launch = "StarMap.dll"
+```
+
+On Linux, a manager then starts `dotnet` with `StarMap.dll`, and on every other platform it starts `StarMap.exe`.
+The platform names are `windows`, `linux` and `macos`.
+Leave out `runtime` when your loader has its own executable on that platform.
+Every `launch` must be in your release archive, or the release is rejected.
+
 ## Claiming and updating a pack
 
 A first pack claim adds the pack version and `packs/<id>/owner.json` in the same pull request.
