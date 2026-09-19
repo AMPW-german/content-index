@@ -16,6 +16,7 @@ import check_index
 import check_license
 import check_schema
 import check_tags
+import page_licenses
 
 VECTORS = Path(__file__).resolve().parent.parent / "schemas" / "vectors.json"
 RULES = {"schema", "id", "bounds", "license", "tags", "images", "abstract"}
@@ -67,6 +68,15 @@ class Vectors(unittest.TestCase):
                 self.assertEqual(bool(notes), vector["noted"], notes)
                 if "says" in vector:
                     self.assertTrue(any(vector["says"] in line for line in errors + notes), errors + notes)
+
+
+class PageLicenses(unittest.TestCase):
+    def test_the_page_knows_the_identifiers_the_checks_know(self):
+        self.assertEqual(
+            page_licenses.TARGET.read_text(encoding="utf-8"),
+            page_licenses.render(),
+            "site/js/licenses.js is out of date, run tools/page_licenses.py",
+        )
 
 
 if __name__ == "__main__":
