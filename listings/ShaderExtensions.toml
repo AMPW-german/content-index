@@ -30,9 +30,9 @@ bugtracker = "https://github.com/AMPW-german/ShaderExtensions/issues"
 game_min = "2026.9.10.5438"
 
 [[dependencies]]
-id = "KittenExtensions"
+id = "KittenExtensionsContinued"
 kind = "required"
-min = "0.5.0"
+min = "0.5.2"
 
 [loader]
 id = "StarMap"
