@@ -29,9 +29,14 @@ bugtracker = "https://github.com/AMPW-german/KSAGEffects/issues"
 game_min = "2026.9.10.5438"
 
 [[dependencies]]
+id = "KittenExtensionsContinued"
+kind = "required"
+min = "0.5.2"
+
+[[dependencies]]
 id = "ShaderExtensions"
 kind = "required"
-min = "1.0.2"
+min = "1.0.4"
 
 [loader]
 id = "StarMap"
